@@ -17,7 +17,12 @@ export default function Home() {
         onClearCanvas={setClearCanvas}
         onErase={() => setColor("#FFFFFF")}
       />
-      <Canvas color={color} lineWidth={lineWidth} />
+      <Canvas
+        color={color}
+        lineWidth={lineWidth}
+        clearCanvas={clearCanvas}
+        setClearCanvas={setClearCanvas}
+      />
     </div>
   );
 }

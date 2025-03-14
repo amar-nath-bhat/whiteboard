@@ -10,7 +10,17 @@ interface CustomCanvasRenderingContext2D extends CanvasRenderingContext2D {
 
 let socket: Socket | null = null;
 
-const Canvas = ({ color, lineWidth }: { color: string; lineWidth: number }) => {
+const Canvas = ({
+  color,
+  lineWidth,
+  clearCanvas,
+  setClearCanvas,
+}: {
+  color: string;
+  lineWidth: number;
+  clearCanvas: boolean;
+  setClearCanvas: (clear: boolean) => void;
+}) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const ctxRef = useRef<CustomCanvasRenderingContext2D | null>(null);
   const [isDrawing, setIsDrawing] = useState(false);
@@ -32,10 +42,20 @@ const Canvas = ({ color, lineWidth }: { color: string; lineWidth: number }) => {
       }
     });
 
+    socket.on("clear", clear);
+
     return () => {
       socket?.disconnect();
     };
   }, []);
+
+  useEffect(() => {
+    if (clearCanvas) {
+      socket?.emit("clear");
+      clear();
+    }
+    setClearCanvas(false);
+  }, [clearCanvas, setClearCanvas]);
 
   useEffect(() => {
     if (canvasRef.current) {
@@ -57,6 +77,17 @@ const Canvas = ({ color, lineWidth }: { color: string; lineWidth: number }) => {
   const stopDrawing = () => {
     setIsDrawing(false);
     ctxRef.current?.beginPath();
+  };
+
+  const clear = () => {
+    if (ctxRef.current) {
+      ctxRef.current.clearRect(
+        0,
+        0,
+        window.innerWidth * 0.8,
+        window.innerHeight * 0.8
+      );
+    }
   };
 
   const draw = (e: React.MouseEvent) => {

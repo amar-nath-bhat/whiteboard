@@ -12,10 +12,12 @@ io.on("connection", (socket) => {
   console.log("A user connected");
 
   socket.on("draw", (data) => {
+    console.log("Drawing");
     socket.broadcast.emit("draw", data);
   });
 
   socket.on("clear", (data) => {
+    console.log("Clearing canvas");
     socket.broadcast.emit("clear", data);
   });
 
