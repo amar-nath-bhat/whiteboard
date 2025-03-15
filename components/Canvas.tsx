@@ -10,16 +10,25 @@ interface CustomCanvasRenderingContext2D extends CanvasRenderingContext2D {
 
 let socket: Socket | null = null;
 
+interface User {
+  username: string;
+  userID: string;
+}
+
 const Canvas = ({
   color,
   lineWidth,
+  username,
   clearCanvas,
   setClearCanvas,
+  setUserList,
 }: {
   color: string;
   lineWidth: number;
+  username: string;
   clearCanvas: boolean;
   setClearCanvas: (clear: boolean) => void;
+  setUserList: (users: User[]) => void;
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const ctxRef = useRef<CustomCanvasRenderingContext2D | null>(null);
@@ -48,6 +57,40 @@ const Canvas = ({
       socket?.disconnect();
     };
   }, []);
+
+  useEffect(() => {
+    // Send the username to the server
+    if (username) {
+      socket?.emit("setUsername", username);
+    }
+
+    // Listen for the "userConnected" event
+    socket?.on("userConnected", (data) => {
+      console.log("You are connected:", data);
+    });
+
+    // Listen for the "userJoined" event
+    socket?.on("userJoined", (data) => {
+      console.log("User joined:", data);
+    });
+
+    // Listen for the "userLeft" event
+    socket?.on("userLeft", (data) => {
+      console.log("User left:", data);
+    });
+
+    // Listen for the "userList" event
+    socket?.on("userList", (userList) => {
+      setUserList(userList);
+    });
+
+    return () => {
+      socket?.off("userConnected");
+      socket?.off("userJoined");
+      socket?.off("userLeft");
+      socket?.off("userList");
+    };
+  }, [username]);
 
   useEffect(() => {
     if (clearCanvas) {
