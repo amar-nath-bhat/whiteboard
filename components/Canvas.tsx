@@ -35,7 +35,7 @@ const Canvas = ({
       if (ctxRef.current) {
         ctxRef.current.strokeStyle = color;
         ctxRef.current.lineWidth = lineWidth;
-        ctxRef.current.beginPath();
+        ctxRef.current.beginPath(); // Start a new path
         ctxRef.current.moveTo(prevX, prevY);
         ctxRef.current.lineTo(x, y);
         ctxRef.current.stroke();
@@ -71,12 +71,26 @@ const Canvas = ({
 
   const startDrawing = (e: React.MouseEvent) => {
     setIsDrawing(true);
-    draw(e);
+    const { clientX, clientY } = e;
+    const canvasRect = canvasRef.current?.getBoundingClientRect();
+
+    const offsetX = clientX - (canvasRect?.left || 0);
+    const offsetY = clientY - (canvasRect?.top || 0);
+
+    if (ctxRef.current) {
+      ctxRef.current.beginPath(); // Start a new path
+      ctxRef.current.moveTo(offsetX, offsetY); // Move to the starting point
+      ctxRef.current.lastX = offsetX;
+      ctxRef.current.lastY = offsetY;
+    }
   };
 
   const stopDrawing = () => {
     setIsDrawing(false);
-    ctxRef.current?.beginPath();
+    if (ctxRef.current) {
+      ctxRef.current.lastX = undefined;
+      ctxRef.current.lastY = undefined;
+    }
   };
 
   const clear = () => {
@@ -93,16 +107,22 @@ const Canvas = ({
   const draw = (e: React.MouseEvent) => {
     if (!isDrawing || !ctxRef.current) return;
 
-    const { offsetX, offsetY } = e.nativeEvent;
+    const { clientX, clientY } = e;
+    const canvasRect = canvasRef.current?.getBoundingClientRect();
+
+    const offsetX = clientX - (canvasRect?.left || 0);
+    const offsetY = clientY - (canvasRect?.top || 0);
+
     const prevX = ctxRef.current.lastX ?? offsetX;
     const prevY = ctxRef.current.lastY ?? offsetY;
 
     ctxRef.current.strokeStyle = color;
     ctxRef.current.lineWidth = lineWidth;
+
+    ctxRef.current.beginPath(); // Start a new path
+    ctxRef.current.moveTo(prevX, prevY);
     ctxRef.current.lineTo(offsetX, offsetY);
     ctxRef.current.stroke();
-    ctxRef.current.beginPath();
-    ctxRef.current.moveTo(offsetX, offsetY);
 
     socket?.emit("draw", {
       x: offsetX,
