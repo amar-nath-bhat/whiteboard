@@ -58,10 +58,13 @@ const Canvas = ({
   }, [clearCanvas, setClearCanvas]);
 
   useEffect(() => {
-    if (canvasRef.current) {
-      const canvas = canvasRef.current;
-      canvas.width = window.innerWidth * 0.8;
-      canvas.height = window.innerHeight * 0.8;
+    const canvas = canvasRef.current;
+    if (canvas) {
+      // Set the canvas's internal size to match its CSS size
+      const { width, height } = canvas.getBoundingClientRect();
+      canvas.width = width;
+      canvas.height = height;
+
       const ctx = canvas.getContext("2d") as CustomCanvasRenderingContext2D;
       ctx.lineCap = "round";
       ctx.lineJoin = "round";
@@ -95,12 +98,10 @@ const Canvas = ({
 
   const clear = () => {
     if (ctxRef.current) {
-      ctxRef.current.clearRect(
-        0,
-        0,
-        window.innerWidth * 0.8,
-        window.innerHeight * 0.8
-      );
+      const canvas = canvasRef.current;
+      if (canvas) {
+        ctxRef.current.clearRect(0, 0, canvas.width, canvas.height);
+      }
     }
   };
 
