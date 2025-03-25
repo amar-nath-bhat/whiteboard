@@ -72,27 +72,36 @@ io.on("connection", (socket) => {
     });
 
     // Send the list of connected users to the new user
-    socket.emit("userList", users);
+    io.emit("userList", users);
   });
 
   // Listen for the "draw" event
   socket.on("draw", (data) => {
     logToFile(`Drawing from user: ${socket.id}`);
-    console.log("Drawing from user:", socket.id);
+    console.log(
+      "Drawing from user:",
+      users.find((user) => user.userID === socket.id).username
+    );
     socket.broadcast.emit("draw", data); // Broadcast to all other clients
   });
 
   // Listen for the "clear" event
   socket.on("clear", (data) => {
     logToFile(`Clearing canvas from user: ${socket.id}`);
-    console.log("Clearing canvas from user:", socket.id);
+    console.log(
+      "Clearing canvas from user:",
+      users.find((user) => user.userID === socket.id).username
+    );
     socket.broadcast.emit("clear", data); // Broadcast to all other clients
   });
 
   // Handle disconnection
   socket.on("disconnect", () => {
     logToFile(`User disconnected: ${socket.id}`);
-    console.log("User disconnected:", socket.id);
+    console.log(
+      "User disconnected:",
+      users.find((user) => user.userID === socket.id).username
+    );
 
     // Remove the user from the list
     const index = users.findIndex((user) => user.userID === socket.id);
